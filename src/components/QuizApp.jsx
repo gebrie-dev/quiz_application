@@ -61,12 +61,15 @@ const QuizApp = () => {
   }
 
   function handleSelected(choice, index) {
-    if (quiz.questions[activeQuestion].correctAnswer === choice) {
-      setSelectedAnswer(true);
-    } else {
-      setSelectedAnswer(false);
+    // Check if the timer has not expired
+    if (quizTime > 0) {
+      if (quiz.questions[activeQuestion].correctAnswer === choice) {
+        setSelectedAnswer(true);
+      } else {
+        setSelectedAnswer(false);
+      }
+      setSelectedAnswerIndex(index);
     }
-    setSelectedAnswerIndex(index);
   }
 
   function handlePlayAgain() {
@@ -79,7 +82,7 @@ const QuizApp = () => {
       correctAnswers: 0,
       wrongAnswers: 0,
     });
-    setQuizTime(1 * 60); // Reset quiz time to 30 minutes
+    setQuizTime(30 * 60); // Reset quiz time to 30 minutes
   }
 
   return (
@@ -94,11 +97,13 @@ const QuizApp = () => {
       </div>
 
       {!showResult ? (
-      <>
-
+        <>
           <div className="text-center mb-3">
             <Button>
-            <span className="text-lg">Time Remaining: {Math.floor(quizTime / 60)}:{quizTime % 60}</span>
+              <span className={`text-lg ${quizTime <= 0 ? "text-red-500" : ""}`}>
+                Time Remaining: {Math.floor(quizTime / 60)}:{quizTime % 60}
+                {quizTime <= 0 && " (Time Expired)"}
+              </span>
             </Button>
           </div>
 
@@ -111,6 +116,7 @@ const QuizApp = () => {
                 index={index}
                 handleSelected={handleSelected}
                 selectedAnswerIndex={selectedAnswerIndex}
+                disabled={quizTime <= 0} // Disable answering if the timer has expired
               />
             ))}
           </ul>
@@ -121,15 +127,15 @@ const QuizApp = () => {
               disabled={activeQuestion === 0}
               classes="text-start hover:bg-blue-200"
             >
-               <FaArrowLeft className="text-xl" />prev
+              <FaArrowLeft className="text-xl" /> Prev
             </Button>
 
             <Button
               onClickEvent={handleNext}
-              disabled={selectedAnswerIndex === null}
+              disabled={selectedAnswerIndex === null || quizTime <= 0}
               classes="text-end"
             >
-             <FaArrowRight className="text-xl" />
+              <FaArrowRight className="text-xl" />
               {loading ? <LoadingSpinner /> : (activeQuestion !== quiz.questions.length - 1 ? "Next" : "Finish")}
             </Button>
           </div>
@@ -164,3 +170,4 @@ const QuizApp = () => {
 };
 
 export default QuizApp;
+
